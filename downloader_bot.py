@@ -3,6 +3,7 @@ import asyncio
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.filters import CommandStart
 from aiogram.types import FSInputFile
+from aiohttp import web
 import yt_dlp
 
 TOKEN = os.getenv("BOT_TOKEN")
@@ -77,7 +78,20 @@ async def link_handler(message: types.Message):
             pass
 
 
+# Render serverini uyg'oq tutish uchun web-sahifa
+async def handle(request):
+    return web.Response(text="Bot is running!")
+
 async def main():
+    # Render portini tinglash (fonda ishlaydi)
+    app = web.Application()
+    app.router.add_get('/', handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 10000)
+    asyncio.create_task(site.start())
+
+    # Botni ishga tushirish
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
