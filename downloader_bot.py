@@ -41,13 +41,14 @@ async def link_handler(message: types.Message):
     video_filename = f"{DOWNLOAD_DIR}/{message.from_user.id}_{message.message_id}.mp4"
 
     # Bloklarni aylanib o'tish uchun eng optimal va mukammal sozlamalar
-    ydl_opts = {
+   ydl_opts = {
         "outtmpl": video_filename,
-        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-        "cookiefile": "cookies.txt",  # YouTube blokidan o'tish uchun kuki fayli ulandi
+        # MUHIM O'ZGARISH: ffmpeg talab qilmaydigan tayyor formatni tanlaymiz
+        "format": "best[ext=mp4]/best", 
+        "cookiefile": "cookies.txt",
         "no_warnings": True,
         "quiet": True,
-        "source_address": "0.0.0.0",  # IPv6 muammolarining oldini olish uchun
+        "source_address": "0.0.0.0",
         "nocheckcertificate": True,
         "http_headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
