@@ -41,7 +41,7 @@ async def link_handler(message: types.Message):
     video_filename = f"{DOWNLOAD_DIR}/{message.from_user.id}_{message.message_id}.mp4"
 
     # Bloklarni aylanib o'tish uchun eng optimal va mukammal sozlamalar
-   ydl_opts = {
+    ydl_opts = {
         "outtmpl": video_filename,
         # MUHIM O'ZGARISH: ffmpeg talab qilmaydigan tayyor formatni tanlaymiz
         "format": "best[ext=mp4]/best", 
