@@ -17,7 +17,7 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 @dp.message(CommandStart())
 async def start_handler(message: types.Message):
     await message.answer(
-        "Salom! 🤖\nMenga TikTok, Instagram yoki YouTube Shorts havolasini yuboring."
+        "Salom! 🤖\nMenga TikTok, Instagram, YouTube, Facebook yoki Twitter (X) havolasini yuboring."
     )
 
 
@@ -25,20 +25,30 @@ async def start_handler(message: types.Message):
 async def link_handler(message: types.Message):
     url = message.text.strip()
 
-    if not ("tiktok.com" in url or "instagram.com" in url or "youtube.com" in url or "youtu.be" in url):
-        await message.answer("Iltimos, faqat TikTok, Instagram yoki YouTube havolalarini yuboring! ❌")
+    # Yangi tarmoqlarni (facebook va twitter/x) filtrga qo'shdik
+    valid_domains = [
+        "tiktok.com", "instagram.com", 
+        "youtube.com", "youtu.be", 
+        "facebook.com", "fb.watch",
+        "twitter.com", "x.com"
+    ]
+
+    if not any(domain in url for domain in valid_domains):
+        await message.answer("Iltimos, faqat TikTok, Instagram, YouTube, Facebook yoki Twitter havolalarini yuboring! ❌")
         return
 
     status_message = await message.answer("Video yuklab olinmoqda... ⏳")
     video_filename = f"{DOWNLOAD_DIR}/{message.from_user.id}_{message.message_id}.mp4"
 
-    # TikTok va Instagram bloklarini aylanib o'tish uchun eng kuchli sozlamalar
+    # Bloklarni aylanib o'tish uchun eng optimal va mukammal sozlamalar
     ydl_opts = {
         "outtmpl": video_filename,
-        "format": "best[ext=mp4]/best",
+        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "cookiefile": "cookies.txt",  # YouTube blokidan o'tish uchun kuki fayli ulandi
         "no_warnings": True,
         "quiet": True,
-        # Brauzer bo'lib ko'rinish (User-Agent)
+        "source_address": "0.0.0.0",  # IPv6 muammolarining oldini olish uchun
+        "nocheckcertificate": True,
         "http_headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
@@ -57,20 +67,17 @@ async def link_handler(message: types.Message):
         await loop.run_in_executor(None, download)
 
         # Fayl yuklandimi yoki yo'q tekshiramiz
-        if os.path.exists(video_filename) and os.path.getsize(video_filename) > 0:
+        if os.path.exists(video_filename):
             video_file = FSInputFile(video_filename)
-            await message.answer_video(video=video_file, caption="Siz so'ragan video tayyor! ✅")
-            os.remove(video_filename)
+            await message.reply_video(video=video_file, caption="Video muvaffaqiyatli yuklandi! 🎉")
+            os.remove(video_filename)  # Serverda joy to'lmasligi uchun faylni o'chiramiz
         else:
-            await message.answer("Videoni serverga yuklashda muammo bo'ldi (fayl topilmadi). ❌")
+            await message.answer("Videoni yuklashda xatolik yuz berdi. Havolani tekshirib ko'ring. ❌")
 
     except Exception as e:
-        # Terminalga aniq xatolikni chiqarish (buni ko'rib muammoni bilsa bo'ladi)
-        print(f"\n[XATOLIK YUZ BERDI]: {e}\n")
-        await message.answer("Kechirasiz, ushbu videoni yuklab bo'lmadi. ❌")
-        if os.path.exists(video_filename):
-            os.remove(video_filename)
-            
+        print(f"Xatolik: {e}")
+        await message.answer("Xatolik yuz berdi. Bu video formati qo'llab-quvvatlanmasligi mumkin. ⚠️")
+
     finally:
         try:
             await status_message.delete()
@@ -78,12 +85,12 @@ async def link_handler(message: types.Message):
             pass
 
 
-# Render serverini uyg'oq tutish uchun web-sahifa
+# Render serverini uyg'oq tutish uchun kichik veb-interfeys
 async def handle(request):
     return web.Response(text="Bot is running!")
 
 async def main():
-    # Render portini tinglash (fonda ishlaydi)
+    # Render portini tinglash (fonda ishlaydi va uyquga ketishdan asraydi)
     app = web.Application()
     app.router.add_get('/', handle)
     runner = web.AppRunner(app)
