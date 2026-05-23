@@ -44,9 +44,9 @@ async def link_handler(message: types.Message):
     ydl_opts = {
         "outtmpl": video_filename,
         "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best", 
-        # Kukini o'chirib, o'rniga televizor kabi avtorizatsiya qilishni yoqamiz
+        # Televizor rejimini yoqamiz, shunda majburlab kod chiqaradi
         "usages_with_oauth": True,
-        "client_name": "web", # yoki "tv" (eng ishonchli mijoz turlari)
+        "client_name": "tv", 
         "no_warnings": True,
         "quiet": True,
         "source_address": "0.0.0.0",
