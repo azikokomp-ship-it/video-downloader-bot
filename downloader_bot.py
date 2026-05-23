@@ -43,9 +43,10 @@ async def link_handler(message: types.Message):
     # Bloklarni aylanib o'tish uchun eng optimal va mukammal sozlamalar
     ydl_opts = {
         "outtmpl": video_filename,
-        # Eng yuqori video va audio sifatni oladi, ffmpeg esa ularni avtomatik mp4 qilib birlashtiradi
         "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best", 
-        "cookiefile": "cookies.txt",
+        # Kukini o'chirib, o'rniga televizor kabi avtorizatsiya qilishni yoqamiz
+        "usages_with_oauth": True,
+        "client_name": "web", # yoki "tv" (eng ishonchli mijoz turlari)
         "no_warnings": True,
         "quiet": True,
         "source_address": "0.0.0.0",
